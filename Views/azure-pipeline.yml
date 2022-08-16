@@ -1,0 +1,27 @@
+pool:
+  vmImage : 'window-2019'
+
+  steps:
+  -  task: UseDotNet@2
+    displayname : Set dotnet core version
+    inputs:
+      version: '5.0.x' 
+
+  -   task: DotNetCoreCLI@2
+     displayName: Build
+     inputs:
+        command: build
+        projects: '**/*.csproj'
+        arguments: '--configuration $(buildConfguration)'
+
+  -    script: dotnet publish -c Release -o build /
+  p:PackageAsSingleFile=true 
+    displayName: Publish  
+       
+  -     task: AzureWebApp@1
+       displayName: 'Deploy Azure Web App'
+       inputs:
+          azureSubscription: 'New App Connection'
+          appName: [nvwebappdeploy]
+          appType: webApp
+          package: ./**/*.zip
